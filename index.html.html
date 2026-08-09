@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sanvee's by Tony - Moderator's Mistake Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase App & Realtime Database SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --radius: 10px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.5;
+        }
+
+        header {
+            background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+            color: white;
+            text-align: center;
+            padding: 2rem 1rem;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            background: var(--card-bg);
+            padding: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            gap: 10px;
+        }
+
+        nav button {
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        nav button:hover {
+            color: var(--primary);
+            background: #f1f5f9;
+        }
+
+        nav button.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: var(--text-main);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group.full {
+            grid-column: span 2;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+            background: #fff;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-print {
+            background-color: #10b981;
+        }
+
+        .btn-print:hover {
+            background-color: #059669;
+        }
+
+        .btn-danger {
+            background-color: #ef4444;
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        .btn-warning {
+            background-color: #f59e0b;
+            padding: 10px 15px;
+            font-size: 13px;
+            border-radius: 8px;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-warning:hover {
+            background-color: #d97706;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8fafc;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .monthly-card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .monthly-header {
+            background: #f8fafc;
+            padding: 12px 20px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .print-header {
+            display: none;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        @media print {
+            body { background: white; }
+            nav, header, .no-print { display: none !important; }
+            .print-header { display: block !important; }
+            .container { box-shadow: none; margin: 0; padding: 0; width: 100%; max-width: 100%; }
+            .section { display: none; }
+            .section.active { display: block; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="no-print">
+        <h1>Sanvee's by Tony</h1>
+        <p style="font-size: 0.9rem; opacity: 0.9; margin-top: 5px;">Moderator's Mistake Tracker</p>
+    </header>
+    
+    <nav class="no-print">
+        <button class="tab-btn active" onclick="showSection('daily-section', this)">Daily Entry</button>
+        <button class="tab-btn" onclick="showSection('monthly-section', this)">Monthly Report</button>
+        <button class="tab-btn" onclick="showSection('moderator-section', this)">Manage Moderators</button>
+    </nav>
+
+    <div class="container">
+        <!-- Daily Entry Section -->
+        <div id="daily-section" class="section active">
+            <h2 class="no-print">Daily Mistake Entry</h2>
+            
+            <div class="form-grid no-print">
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="daily-date">
+                </div>
+                
+                <div class="form-group">
+                    <label>Select Moderator (Type to search)</label>
+                    <input list="moderators-datalist" id="daily-moderator" placeholder="Type name to search...">
+                    <datalist id="moderators-datalist"></datalist>
+                </div>
+
+                <div class="form-group">
+                    <label>Mistake Details</label>
+                    <input type="text" id="daily-details" placeholder="Describe the mistake...">
+                </div>
+
+                <div class="form-group">
+                    <label>Customer Name or Number</label>
+                    <input type="text" id="daily-customer" placeholder="Enter customer name/number...">
+                </div>
+
+                <div class="form-group full">
+                    <button class="btn" style="width: 100%;" onclick="addMistake()">Add Mistake Entry</button>
+                </div>
+            </div>
+            
+            <hr class="no-print" style="margin: 25px 0; border: none; border-top: 1px solid var(--border-color);">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;" class="no-print">
+                <h3>Entries for: <span id="display-date" style="color: var(--primary);">Today</span></h3>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-warning" onclick="deleteDailyData()">🗑️ Delete This Date's Data</button>
+                    <button class="btn btn-print" onclick="window.print()">🖨️ Print Daily Report</button>
+                </div>
+            </div>
+            
+            <div class="print-header">
+                <h1 style="font-size: 22px; color: #1e293b;">Sanvee's by Tony</h1>
+                <h2 style="font-size: 18px; margin-top: 5px; border: none; color: #4f46e5;">Moderator's Mistakes</h2>
+                <p style="font-size: 14px; color: #64748b; margin-top: 3px;">Date: <span id="print-display-date">Today</span></p>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th width="8%">SL</th>
+                        <th width="24%">Moderator Name</th>
+                        <th width="32%">Mistake Details</th>
+                        <th width="24%">Customer Name/Number</th>
+                        <th width="12%" class="no-print">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="daily-table-body"></tbody>
+            </table>
+        </div>
+
+        <!-- Monthly Report Section -->
+        <div id="monthly-section" class="section">
+            <h2 class="no-print">Monthly Report & Statistics</h2>
+            
+            <div class="form-group no-print" style="max-width: 300px;">
+                <label>Select Month</label>
+                <input type="month" id="monthly-month" onchange="generateMonthlyReport()">
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin: 20px 0;" class="no-print">
+                <h3>Report for Month: <span id="display-month" style="color: var(--primary);">...</span></h3>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-warning" onclick="deleteMonthlyData()">🗑️ Delete This Month's Data</button>
+                    <button class="btn btn-print" onclick="window.print()">🖨️ Print Monthly Report</button>
+                </div>
+            </div>
+
+            <div class="print-header">
+                <h1 style="font-size: 22px; color: #1e293b;">Sanvee's by Tony</h1>
+                <h2 style="font-size: 18px; margin-top: 5px; border: none; color: #4f46e5;">Moderator's Mistakes</h2>
+                <p style="font-size: 14px; color: #64748b; margin-top: 3px;">Monthly Report: <span id="print-display-month">...</span></p>
+            </div>
+            
+            <div id="monthly-container"></div>
+        </div>
+
+        <!-- Manage Moderators Section -->
+        <div id="moderator-section" class="section no-print">
+            <h2>Manage Moderators</h2>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>New Moderator Name</label>
+                    <input type="text" id="new-moderator-name" placeholder="Enter full name">
+                </div>
+                <div class="form-group" style="display: flex; align-items: flex-end;">
+                    <button class="btn" style="width: 100%;" onclick="addModerator()">Add Moderator</button>
+                </div>
+            </div>
+            
+            <h3 style="margin-top: 30px; font-size: 1.2rem; margin-bottom: 10px;">Moderator List</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th width="10%">SL</th>
+                        <th width="70%">Moderator Name</th>
+                        <th width="20%">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="moderator-table-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // --- Firebase Configuration ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBvrbLXqMHsTG2N3eePFF0900luktM4W60",
+            authDomain: "sanveepos.firebaseapp.com",
+            databaseURL: "https://sanveepos-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "sanveepos",
+            storageBucket: "sanveepos.firebasestorage.app",
+            messagingSenderId: "708358963481",
+            appId: "1:708358963481:web:6908e17b969efdaf6ac588",
+            measurementId: "G-NQTXS5JXFP"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const initialModerators = [
+            "Sefat Karim", "Akram", "Arman Alif", "Sajedul Islam", "Tarikul Islam", 
+            "Tonmoy", "Omar Faruk Majumder", "Md Sujon", "Mosharof Hossain", "Md Raihan", 
+            "Moinul Islam", "Sifat Hossain", "Shakib Ahmed", "Al Arafat", "Kowshiq", 
+            "Mamun", "Sahil (Forever)", "Najmul Islam", "Mehadi Hasan", "Naim Khan", 
+            "Rezaul Karim", "Sami", "Sahil Sheikh", "Piyal Sarker", "Abu Torab"
+        ];
+
+        let moderators = [];
+        let mistakes = [];
+
+        document.getElementById('daily-date').valueAsDate = new Date();
+        document.getElementById('monthly-month').value = new Date().toISOString().slice(0, 7);
+
+        // Realtime Data Sync from Firebase
+        db.ref('moderators').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                moderators = Object.values(data);
+            } else {
+                moderators = initialModerators;
+                db.ref('moderators').set(initialModerators);
+            }
+            updateModeratorDatalist();
+            renderModeratorTable();
+        });
+
+        db.ref('mistakes').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                mistakes = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+            } else {
+                mistakes = [];
+            }
+            renderDailyTable();
+            generateMonthlyReport();
+        });
+
+        window.onload = () => {
+            document.getElementById('daily-date').addEventListener('change', renderDailyTable);
+        }
+
+        function showSection(sectionId, btn) {
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        function updateModeratorDatalist() {
+            const datalist = document.getElementById('moderators-datalist');
+            datalist.innerHTML = '';
+            moderators.forEach(mod => {
+                const option = document.createElement('option');
+                option.value = mod;
+                datalist.appendChild(option);
+            });
+        }
+
+        function renderModeratorTable() {
+            const tbody = document.getElementById('moderator-table-body');
+            tbody.innerHTML = '';
+            moderators.forEach((mod, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><strong>${mod}</strong></td>
+                    <td><button class="btn-danger" onclick="deleteModerator('${mod}')">Delete</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function addModerator() {
+            const nameInput = document.getElementById('new-moderator-name');
+            const name = nameInput.value.trim();
+            if (name && !moderators.includes(name)) {
+                moderators.push(name);
+                db.ref('moderators').set(moderators);
+                nameInput.value = '';
+                alert("Moderator added successfully!");
+            } else {
+                alert("Please enter a valid or unique name.");
+            }
+        }
+
+        function deleteModerator(name) {
+            if(confirm(`Are you sure you want to delete ${name}?`)) {
+                moderators = moderators.filter(m => m !== name);
+                db.ref('moderators').set(moderators);
+            }
+        }
+
+        function addMistake() {
+            const date = document.getElementById('daily-date').value;
+            const name = document.getElementById('daily-moderator').value.trim();
+            const details = document.getElementById('daily-details').value.trim();
+            const customer = document.getElementById('daily-customer').value.trim();
+
+            if (!date || !name || !details || !customer) {
+                alert("Please fill in all fields correctly.");
+                return;
+            }
+            if (!moderators.includes(name)) {
+                alert("Moderator not found in the list!");
+                return;
+            }
+
+            db.ref('mistakes').push({ date, name, details, customer });
+            
+            document.getElementById('daily-details').value = '';
+            document.getElementById('daily-customer').value = '';
+            document.getElementById('daily-moderator').value = '';
+        }
+
+        function deleteSingleMistake(id) {
+            if(confirm("Are you sure you want to delete this specific mistake entry?")) {
+                db.ref('mistakes/' + id).remove();
+            }
+        }
+
+        function deleteDailyData() {
+            const selectedDate = document.getElementById('daily-date').value;
+            if(confirm(`Are you sure you want to delete ALL mistake entries for ${selectedDate}?`)) {
+                const updates = {};
+                mistakes.forEach(m => {
+                    if (m.date === selectedDate) {
+                        updates[m.id] = null;
+                    }
+                });
+                db.ref('mistakes').update(updates);
+                alert("All entries for this date have been deleted.");
+            }
+        }
+
+        function deleteMonthlyData() {
+            const monthStr = document.getElementById('monthly-month').value;
+            if(!monthStr) return;
+            if(confirm(`Are you sure you want to delete ALL mistake entries for this month?`)) {
+                const updates = {};
+                mistakes.forEach(m => {
+                    if (m.date.startsWith(monthStr)) {
+                        updates[m.id] = null;
+                    }
+                });
+                db.ref('mistakes').update(updates);
+                alert("All entries for this month have been deleted.");
+            }
+        }
+
+        function renderDailyTable() {
+            const selectedDate = document.getElementById('daily-date').value;
+            document.getElementById('display-date').textContent = selectedDate;
+            document.getElementById('print-display-date').textContent = selectedDate;
+            
+            const tbody = document.getElementById('daily-table-body');
+            tbody.innerHTML = '';
+            
+            const todaysMistakes = mistakes.filter(m => m.date === selectedDate);
+            
+            if (todaysMistakes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted);">No mistakes recorded for this date.</td></tr>';
+                return;
+            }
+
+            todaysMistakes.forEach((m, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><strong>${m.name}</strong></td>
+                    <td>${m.details}</td>
+                    <td>${m.customer}</td>
+                    <td class="no-print"><button class="btn-danger" onclick="deleteSingleMistake('${m.id}')">Delete</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function generateMonthlyReport() {
+            const monthStr = document.getElementById('monthly-month').value; 
+            if(!monthStr) return;
+            
+            const [year, month] = monthStr.split('-');
+            const dateObj = new Date(year, month - 1, 1);
+            const formattedMonthName = dateObj.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+
+            document.getElementById('display-month').textContent = formattedMonthName;
+            document.getElementById('print-display-month').textContent = formattedMonthName;
+            
+            const container = document.getElementById('monthly-container');
+            container.innerHTML = '';
+
+            const monthlyMistakes = mistakes.filter(m => m.date.startsWith(monthStr));
+            
+            if (monthlyMistakes.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">No data found for this month.</p>';
+                return;
+            }
+
+            const groupedData = {};
+            moderators.forEach(mod => groupedData[mod] = { total: 0, entries: [] });
+
+            monthlyMistakes.forEach(m => {
+                if (groupedData[m.name]) {
+                    groupedData[m.name].total += 1;
+                    groupedData[m.name].entries.push(m);
+                }
+            });
+
+            const activeMods = Object.entries(groupedData)
+                .filter(([name, data]) => data.total > 0)
+                .sort((a, b) => b[1].total - a[1].total);
+
+            if (activeMods.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">No mistakes found for any moderator this month.</p>';
+                return;
+            }
+
+            activeMods.forEach(([modName, data]) => {
+                const card = document.createElement('div');
+                card.className = 'monthly-card';
+                
+                card.innerHTML = `
+                    <div class="monthly-header">
+                        <span>👤 ${modName}</span>
+                        <span style="color: var(--primary);">Total Mistakes: <strong>${data.total}</strong></span>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th width="8%">SL</th>
+                                <th width="22%">Date</th>
+                                <th width="35%">Mistake Details</th>
+                                <th width="35%">Customer Name/Number</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.entries.map((e, idx) => `
+                                <tr>
+                                    <td>${idx + 1}</td>
+                                    <td>${e.date}</td>
+                                    <td>${e.details}</td>
+                                    <td>${e.customer}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                container.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>

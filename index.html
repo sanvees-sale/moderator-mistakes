@@ -558,9 +558,7 @@
             const rememberMe = document.getElementById('remember-me-checkbox').checked;
 
             if (inputVal === savedPass) {
-                if (rememberMe) {
-                    localStorage.setItem('isLoggedIn', 'true');
-                }
+                localStorage.setItem('isLoggedIn', 'true');
                 document.getElementById('login-overlay').style.display = 'none';
             } else {
                 alert('Incorrect Password! Please try again.');
@@ -788,48 +786,38 @@
                 return;
             }
 
-            const groupedData = {};
-            moderators.forEach(mod => groupedData[mod] = { total: 0, entries: [] });
-
+            // তারিখ অনুযায়ী গ্রুপ করা
+            const groupedByDate = {};
             monthlyMistakes.forEach(m => {
-                if (groupedData[m.name]) {
-                    groupedData[m.name].total += 1;
-                    groupedData[m.name].entries.push(m);
-                }
+                if (!groupedByDate[m.date]) groupedByDate[m.date] = [];
+                groupedByDate[m.date].push(m);
             });
 
-            const activeMods = Object.entries(groupedData)
-                .filter(([name, data]) => data.total > 0)
-                .sort((a, b) => b[1].total - a[1].total);
+            // তারিখগুলো ক্রমানুসারে সাজানো
+            const sortedDates = Object.keys(groupedByDate).sort();
 
-            if (activeMods.length === 0) {
-                container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">No mistakes found for any moderator this month.</p>';
-                return;
-            }
-
-            activeMods.forEach(([modName, data]) => {
+            sortedDates.forEach(date => {
                 const card = document.createElement('div');
                 card.className = 'monthly-card';
+                card.style.marginBottom = '20px';
                 
                 card.innerHTML = `
-                    <div class="monthly-header">
-                        <span>👤 ${modName}</span>
-                        <span style="color: var(--primary);">Total Mistakes: <strong>${data.total}</strong></span>
+                    <div class="monthly-header" style="background: #eef2ff; color: var(--primary);">
+                        <span>📅 ${date}</span>
+                        <span>Total Mistakes: <strong>${groupedByDate[date].length}</strong></span>
                     </div>
                     <table>
                         <thead>
                             <tr>
-                                <th width="8%">SL</th>
-                                <th width="22%">Date</th>
-                                <th width="35%">Mistake Details</th>
-                                <th width="35%">Customer Name/Number</th>
+                                <th width="20%">Moderator</th>
+                                <th width="40%">Details</th>
+                                <th width="40%">Customer</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${data.entries.map((e, idx) => `
+                            ${groupedByDate[date].map(e => `
                                 <tr>
-                                    <td>${idx + 1}</td>
-                                    <td>${e.date}</td>
+                                    <td><strong>${e.name}</strong></td>
                                     <td>${e.details}</td>
                                     <td>${e.customer}</td>
                                 </tr>

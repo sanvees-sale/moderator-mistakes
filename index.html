@@ -745,14 +745,14 @@
             const tbody = document.getElementById('daily-table-body');
             tbody.innerHTML = '';
             
-            const todaysMistakes = mistakes.filter(m => m.date === selectedDate);
+            data = mistakes.filter(m => m.date === selectedDate);
             
-            if (todaysMistakes.length === 0) {
+            if (data.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted);">No mistakes recorded for this date.</td></tr>';
                 return;
             }
 
-            todaysMistakes.forEach((m, index) => {
+            data.forEach((m, index) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${index + 1}</td>
@@ -786,38 +786,38 @@
                 return;
             }
 
-            // তারিখ অনুযায়ী গ্রুপ করা
-            const groupedByDate = {};
+            // মডারেটর অনুযায়ী গ্রুপ করা
+            const groupedByModerator = {};
             monthlyMistakes.forEach(m => {
-                if (!groupedByDate[m.date]) groupedByDate[m.date] = [];
-                groupedByDate[m.date].push(m);
+                if (!groupedByModerator[m.name]) groupedByModerator[m.name] = [];
+                groupedByModerator[m.name].push(m);
             });
 
-            // তারিখগুলো ক্রমানুসারে সাজানো
-            const sortedDates = Object.keys(groupedByDate).sort();
+            // মডারেটরদের নামগুলো ক্রমানুসারে সাজানো
+            const sortedModerators = Object.keys(groupedByModerator).sort();
 
-            sortedDates.forEach(date => {
+            sortedModerators.forEach(modName => {
                 const card = document.createElement('div');
                 card.className = 'monthly-card';
                 card.style.marginBottom = '20px';
                 
                 card.innerHTML = `
                     <div class="monthly-header" style="background: #eef2ff; color: var(--primary);">
-                        <span>📅 ${date}</span>
-                        <span>Total Mistakes: <strong>${groupedByDate[date].length}</strong></span>
+                        <span>👤 ${modName}</span>
+                        <span>Total Mistakes: <strong>${groupedByModerator[modName].length}</strong></span>
                     </div>
                     <table>
                         <thead>
                             <tr>
-                                <th width="20%">Moderator</th>
+                                <th width="20%">Date</th>
                                 <th width="40%">Details</th>
                                 <th width="40%">Customer</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${groupedByDate[date].map(e => `
+                            ${groupedByModerator[modName].map(e => `
                                 <tr>
-                                    <td><strong>${e.name}</strong></td>
+                                    <td><strong>${e.date}</strong></td>
                                     <td>${e.details}</td>
                                     <td>${e.customer}</td>
                                 </tr>

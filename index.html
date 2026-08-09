@@ -76,6 +76,21 @@
             margin-bottom: 25px;
         }
 
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin: 15px 0 20px 0;
+            text-align: left;
+        }
+
+        .remember-me input {
+            width: auto;
+            cursor: pointer;
+        }
+
         header {
             background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
             color: white;
@@ -348,9 +363,14 @@
                 <input type="text" id="login-user-input" value="Admin" readonly style="background-color: #e2e8f0; cursor: not-allowed;">
             </div>
 
-            <div class="form-group" style="margin-bottom: 20px;">
+            <div class="form-group" style="margin-bottom: 5px;">
                 <label>Password</label>
-                <input type="text" id="login-pass-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Enter password" onkeypress="if(event.key === 'Enter') checkLogin()">
+                <input type="password" id="login-pass-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Enter password" onkeypress="if(event.key === 'Enter') checkLogin()">
+            </div>
+
+            <div class="remember-me">
+                <input type="checkbox" id="remember-me-checkbox">
+                <label for="remember-me-checkbox" style="margin:0; text-transform:none; cursor:pointer;">Remember me (Stay logged in)</label>
             </div>
 
             <button class="btn" style="width: 100%;" onclick="checkLogin()">Login System</button>
@@ -522,12 +542,25 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // Check Login Status on Page Load
+        window.onload = () => {
+            const isLogged = localStorage.getItem('isLoggedIn');
+            if (isLogged === 'true') {
+                document.getElementById('login-overlay').style.display = 'none';
+            }
+            document.getElementById('daily-date').addEventListener('change', renderDailyTable);
+        };
+
         // Admin Authentication & Password Management
         function checkLogin() {
             const inputVal = document.getElementById('login-pass-input').value;
             const savedPass = localStorage.getItem('admin_pass') || 'manik420';
+            const rememberMe = document.getElementById('remember-me-checkbox').checked;
 
             if (inputVal === savedPass) {
+                if (rememberMe) {
+                    localStorage.setItem('isLoggedIn', 'true');
+                }
                 document.getElementById('login-overlay').style.display = 'none';
             } else {
                 alert('Incorrect Password! Please try again.');
@@ -597,10 +630,6 @@
             renderDailyTable();
             generateMonthlyReport();
         });
-
-        window.onload = () => {
-            document.getElementById('daily-date').addEventListener('change', renderDailyTable);
-        }
 
         function showSection(sectionId, btn) {
             document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));

@@ -159,6 +159,7 @@
 
         .form-group {
             margin-bottom: 15px;
+            text-align: left;
         }
 
         .form-group.full {
@@ -321,6 +322,7 @@
             border-radius: var(--radius);
             max-width: 500px;
             margin-top: 20px;
+            text-align: left;
         }
 
         @media print {
@@ -339,10 +341,18 @@
     <div id="login-overlay">
         <div class="login-box">
             <h2>Sanvee's Admin</h2>
-            <p>Please enter your admin password to continue</p>
-            <div class="form-group" style="margin-bottom: 20px;">
-                <input type="password" id="login-pass-input" placeholder="Enter password (default: manik420)" onkeypress="if(event.key === 'Y' || event.key === 'Enter') checkLogin()">
+            <p>Please enter credentials to continue</p>
+            
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="login-user-input" value="Admin" readonly style="background-color: #e2e8f0; cursor: not-allowed;">
             </div>
+
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label>Password</label>
+                <input type="text" id="login-pass-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Enter password (manik420)" onkeypress="if(event.key === 'Enter') checkLogin()">
+            </div>
+
             <button class="btn" style="width: 100%;" onclick="checkLogin()">Login System</button>
         </div>
     </div>
@@ -481,15 +491,15 @@
                 <h3 style="font-size: 1.15rem; margin-bottom: 15px; color: var(--text-main);">Change Admin Password</h3>
                 <div class="form-group">
                     <label>Current Password</label>
-                    <input type="password" id="current-pass" placeholder="Enter current password">
+                    <input type="text" autocomplete="off" id="current-pass" placeholder="Enter current password">
                 </div>
                 <div class="form-group">
                     <label>New Password</label>
-                    <input type="password" id="new-pass" placeholder="Enter new password">
+                    <input type="text" autocomplete="off" id="new-pass" placeholder="Enter new password">
                 </div>
                 <div class="form-group" style="margin-bottom: 20px;">
                     <label>Confirm New Password</label>
-                    <input type="password" id="confirm-pass" placeholder="Re-enter new password">
+                    <input type="text" autocomplete="off" id="confirm-pass" placeholder="Re-enter new password">
                 </div>
                 <button class="btn" onclick="changePassword()">Update Password</button>
             </div>

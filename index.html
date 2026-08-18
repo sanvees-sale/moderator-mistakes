@@ -601,10 +601,12 @@
             const currentPass = document.getElementById('current-pass').value;
             const newPass = document.getElementById('new-pass').value;
             const confirmPass = document.getElementById('confirm-pass').value;
+            
+            // Fix: Fallback to 'manik420' if saved password is empty or invalid
             const savedPass = localStorage.getItem('admin_pass') || 'manik420';
 
             if (currentPass !== savedPass) {
-                alert('Current password is incorrect!');
+                alert('Current password is incorrect! (Default is manik420)');
                 return;
             }
             if (!newPass || newPass.length < 4) {
